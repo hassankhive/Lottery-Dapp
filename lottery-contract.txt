@@ -1,0 +1,104 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8;
+
+contract Lottery{
+    address private owner;
+    uint public joiningFee;
+    uint private participantsLimit;
+    address private winnerAddress;
+
+    address[] private participants;
+    bool private winnerAnnounced = false;
+    bool private lotteryCreated = false;
+
+    bool private reentranceCheck = false;
+
+    //constructor(uint _joiningFee, uint _participantsLimit){
+    //    owner = msg.sender;
+    //    joiningFee = _joiningFee;
+    //    participantsLimit = _participantsLimit;
+    //}
+
+    function getWinner() public view returns(address){
+        require(winnerAnnounced, "Winner not announced yet!");
+        return winnerAddress;
+    }
+    function getParticipantsCount() public view returns(uint){
+        return participants.length;
+    }
+    function getRandomNumber(uint min, uint max) private view returns (uint) {
+        require(max > min, "Max must be greater than min");
+        uint random = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % (max - min + 1);
+        return random + min;
+    }
+
+
+    // ------------- Owner Logic --------------
+    function createLottery(uint _joiningFee, uint _participantsLimit) public {
+        require(!lotteryCreated, "Lottery already created!");
+        
+        owner = msg.sender;
+        joiningFee = _joiningFee;
+        participantsLimit = _participantsLimit;
+
+        lotteryCreated = true;
+    }
+
+    function getParticipants() public view ownerOnly returns(address[] memory){
+        return participants;
+    }
+    function getContractBalance() public view ownerOnly returns(uint){
+        return address(this).balance;
+    }
+    function announceWinner() public ownerOnly{
+        require(participants.length >= participantsLimit, "Please wait of all participants!");
+
+        winnerAddress = participants[getRandomNumber(0, participants.length - 1)];
+        (bool success, bytes memory data) = winnerAddress.call{value:address(this).balance}('');
+        require(success, "Amount transfer to winner failed!");
+
+        winnerAnnounced = true;
+    }
+
+
+    // -------------- Participant Logic --------------
+    function joinLottery() public payable participantOnly {
+        require(!reentranceCheck, "Reentrance Detected! Already in process...");
+        reentranceCheck = true;
+
+        require(participants.length < participantsLimit, "Houseful! Can't join...");
+        
+        bool alreadyJoined = false;
+        for (uint i=0; i < participants.length; i++) 
+        {
+            if(participants[i] == msg.sender)
+            {
+                alreadyJoined = true;
+                break;
+            }   
+        }
+        
+        require(!alreadyJoined, "Already joined!");
+        require(msg.value == joiningFee, "Joining fee is not correct!");
+
+        (bool success,) = payable (address(this)).call{value:joiningFee}('');
+        require(success, "Joining failed!");
+
+        reentranceCheck = false;
+
+        participants.push(msg.sender);
+    }
+    
+    fallback() external payable { }
+    receive() external payable { }
+
+
+    modifier ownerOnly() {
+        require(msg.sender == owner, "Only Owner");
+        _;
+    }
+    modifier participantOnly(){
+        require(msg.sender != owner, "Only Participant");
+        _;
+    }
+}
