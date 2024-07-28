@@ -4,21 +4,25 @@ pragma solidity ^0.8;
 contract Lottery{
     address private owner;
     uint public joiningFee;
-    uint private participantsLimit;
+    uint public participantsLimit;
     address private winnerAddress;
 
     address[] private participants;
-    bool private winnerAnnounced = false;
-    bool private lotteryCreated = false;
-
+    bool public winnerAnnounced = false;
+    bool public lotteryCreated = false;
     bool private reentranceCheck = false;
 
-    //constructor(uint _joiningFee, uint _participantsLimit){
-    //    owner = msg.sender;
-    //    joiningFee = _joiningFee;
-    //    participantsLimit = _participantsLimit;
-    //}
+    event LotteryCreated(uint joinfee, uint joinLimit);
+    event ParticipantJoined(address participantAddress, uint contractBalance);
+    event WinnerAnnounced(address winnerAddress);
 
+    constructor(){
+        owner = msg.sender;
+    }
+
+    function isOwner() public view returns(bool) {
+        return msg.sender == owner;
+    }
     function getWinner() public view returns(address){
         require(winnerAnnounced, "Winner not announced yet!");
         return winnerAddress;
@@ -37,11 +41,12 @@ contract Lottery{
     function createLottery(uint _joiningFee, uint _participantsLimit) public {
         require(!lotteryCreated, "Lottery already created!");
         
-        owner = msg.sender;
         joiningFee = _joiningFee;
         participantsLimit = _participantsLimit;
 
         lotteryCreated = true;
+
+        emit LotteryCreated(joiningFee, participantsLimit);
     }
 
     function getParticipants() public view ownerOnly returns(address[] memory){
@@ -58,6 +63,7 @@ contract Lottery{
         require(success, "Amount transfer to winner failed!");
 
         winnerAnnounced = true;
+        emit WinnerAnnounced(winnerAddress);
     }
 
 
@@ -68,15 +74,7 @@ contract Lottery{
 
         require(participants.length < participantsLimit, "Houseful! Can't join...");
         
-        bool alreadyJoined = false;
-        for (uint i=0; i < participants.length; i++) 
-        {
-            if(participants[i] == msg.sender)
-            {
-                alreadyJoined = true;
-                break;
-            }   
-        }
+        bool alreadyJoined = hasAlreadyJoined();
         
         require(!alreadyJoined, "Already joined!");
         require(msg.value == joiningFee, "Joining fee is not correct!");
@@ -87,6 +85,18 @@ contract Lottery{
         reentranceCheck = false;
 
         participants.push(msg.sender);
+
+        emit ParticipantJoined(msg.sender, address(this).balance);
+    }
+    function hasAlreadyJoined() public view returns(bool) {
+        for (uint i=0; i < participants.length; i++) 
+        {
+            if(participants[i] == msg.sender)
+            {
+                return true;
+            }   
+        }
+        return false;
     }
     
     fallback() external payable { }

@@ -1,7 +1,7 @@
-export const address = "0xa2e9669fC58d055D0aF1BaEd20dcF10A9e0DCb97";
+export const contractAddress = "0xC57205a373b2BdFc81a0469e76f74Dc98A08Da57";
 
 
-[
+export const contractABI = [
 	{
 		"inputs": [],
 		"name": "announceWinner",
@@ -33,6 +33,62 @@ export const address = "0xa2e9669fC58d055D0aF1BaEd20dcF10A9e0DCb97";
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "joinfee",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "joinLimit",
+				"type": "uint256"
+			}
+		],
+		"name": "LotteryCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "participantAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "contractBalance",
+				"type": "uint256"
+			}
+		],
+		"name": "ParticipantJoined",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "winnerAddress",
+				"type": "address"
+			}
+		],
+		"name": "WinnerAnnounced",
+		"type": "event"
 	},
 	{
 		"stateMutability": "payable",
@@ -96,6 +152,32 @@ export const address = "0xa2e9669fC58d055D0aF1BaEd20dcF10A9e0DCb97";
 	},
 	{
 		"inputs": [],
+		"name": "hasAlreadyJoined",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isOwner",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "joiningFee",
 		"outputs": [
 			{
@@ -106,5 +188,44 @@ export const address = "0xa2e9669fC58d055D0aF1BaEd20dcF10A9e0DCb97";
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "lotteryCreated",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "participantsLimit",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "winnerAnnounced",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	}
-]
+];
