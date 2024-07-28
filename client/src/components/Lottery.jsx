@@ -10,6 +10,7 @@ const Lottery = ({contract}) => {
   const [joinLimit, setJoinLimit] = useState(0);
   const [participants, setParticipants] = useState([]);
   const [participantCount, setParticipantCount] = useState(0);
+  const [winner, setWinner] = useState('');
 
   useEffect(() => {
     const Init = async () => {
@@ -20,18 +21,20 @@ const Lottery = ({contract}) => {
       setJoinFee(fee);
       setJoinLimit(limit.toNumber());
       setParticipantCount((await contract.getParticipantsCount()).toNumber());
-
+      
+      const winnerAnnounced = await contract.winnerAnnounced();
+      if(winnerAnnounced)setWinner(await contract.getWinner());
       if(isOwner) setParticipants(await contract.getParticipants());
     }
 
     if(contract) Init();
-  }, [contract]);
+  }, [contract, isOwner]);
 
   return (
     <div className='text-white flex flex-col items-center gap-3'>
        <h1 className='text-[50px]'>Lottery Details</h1>
        
-       <StatsContainer title={"Winner:"} value={"Null"}/>
+       <StatsContainer title={"Winner:"} value={winner}/>
 
        <br/>
        

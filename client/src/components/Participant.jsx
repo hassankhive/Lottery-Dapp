@@ -5,6 +5,7 @@ import StatsContainer from './StatsContainer';
 
 const Participant = ({contract}) => {
   const [alreadyJoined, setAlreadyJoined] = useState(false);
+  const [lotteryCreated, setLotteryCreated] = useState(false);
 
   const onJoin = async () => {
     const joinFee = (await contract.joiningFee()).toNumber();
@@ -25,6 +26,7 @@ const Participant = ({contract}) => {
   useEffect(() => {
     const init = async () => {
       setAlreadyJoined(await contract.hasAlreadyJoined());
+      setLotteryCreated(await contract.lotteryCreated());
     }
 
     if(contract) init();
@@ -35,7 +37,13 @@ const Participant = ({contract}) => {
         <h1 className='text-[50px]'>Participant</h1>
         {
           !alreadyJoined ? (
-            <Button onClick={onJoin} text={'Join Lottery'}/>
+            
+              lotteryCreated ? (
+                <Button onClick={onJoin} text={'Join Lottery'}/>
+              ) : (
+                <StatsContainer value={"No lottery found!"}/>
+              )
+            
 
           ) : (
             <StatsContainer value={"Already joined!"}/>

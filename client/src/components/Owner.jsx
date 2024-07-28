@@ -8,6 +8,8 @@ const Owner = ({contract}) => {
   const [lotteryCreated, setLotteryCreated] = useState(false);
   const [canAnnounceWinner, setCanAnnounceWinner] = useState(false);
   const [winnerAnnounced, setWinnerAnnounced] = useState(false);
+  const [participantsCount, setParticipantsCount] = useState(0);
+  const [joinLimit, setJoinLimit] = useState(0);
 
   const joiningFeeInput = useRef(null);
   const participantLimitInput = useRef(null);
@@ -38,7 +40,17 @@ const Owner = ({contract}) => {
     }
   }
   const announceWinner = async () => {
+    const transaction = await contract.announceWinner();
+    const receipt = await transaction.wait();
 
+    if(receipt.status == 1)
+    {
+      console.log("Winner decided successfully!");
+    }
+    else
+    {
+      console.error("Failed to decide winner! " + receipt);
+    }
   }
 
   useEffect(() => {
@@ -48,15 +60,15 @@ const Owner = ({contract}) => {
         setLotteryCreated(await contract.lotteryCreated());
         setWinnerAnnounced(await contract.winnerAnnounced());
 
-        const joinLimit = (await contract.participantsLimit()).toNumber;
         const participants = await contract.getParticipants();
+        setJoinLimit((await contract.participantsLimit()).toNumber());
 
         setCanAnnounceWinner(participants.length >= joinLimit);
       }
     }
 
     init();
-  },[contract]);
+  },[contract, joinLimit]);
 
   return (
     <>
